@@ -14,6 +14,12 @@
   `(let ((pyx/electric-colon-enabled nil))
      ,@body))
 
+(defmacro with-python-buffer (&rest body)
+  `(with-temp-buffer
+     (let ((python-indent-guess-indent-offset nil)
+           (python-indent-offset 4))
+       (python-mode)
+       ,@body)))
 
 (defun -get-line (n)
   (save-excursion
@@ -21,10 +27,8 @@
     (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
 
 (defun -should-insert-newline-and-indent (text)
-  (with-temp-buffer
-    (let ((current-line -1)
-          (python-indent-guess-indent-offset nil))
-      (python-mode)
+  (with-python-buffer
+    (let ((current-line -1))
       (insert text)
       (setq current-line (line-number-at-pos))
       (call-interactively 'pyx/electric-colon)
@@ -33,10 +37,8 @@
       (should (string-equal (-get-line 1) (concat text ":"))))))
 
 (defun -should-not-insert-newline-nor-indent (text)
-  (with-temp-buffer
-    (let ((current-line -1)
-          (python-indent-guess-indent-offset nil))
-      (python-mode)
+  (with-python-buffer
+    (let ((current-line -1))
       (insert text)
       (setq current-line (line-number-at-pos))
       (call-interactively 'pyx/electric-colon)
