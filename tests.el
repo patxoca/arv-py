@@ -1,7 +1,7 @@
 ;;; tests.el --- tests for tests
 
 (require 'ert)
-(require 'arv-py)
+(require 'pyx)
 
 
 ;;; helper stuff

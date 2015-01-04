@@ -1,9 +1,9 @@
-;;; arv-py.el --- helpers for python programming
+;;; pyx.el --- helpers for python programming
 
 ;; $Id:$
 
 ;; Emacs List Archive Entry
-;; Filename: arv-py.el
+;; Filename: pyx.el
 ;; Version: $Revision:$
 ;; Keywords:
 ;; Author: Alexis Roda <alexis.roda.villalonga@gmail.com>
@@ -86,6 +86,6 @@ regarding when to and when not to insert that newline."
           (newline-and-indent)))))
 
 
-(provide 'arv-py)
+(provide 'pyx)
 
-;;; arv-py.el ends here
+;;; pyx.el ends here
