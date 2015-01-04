@@ -125,6 +125,17 @@ param1)")))
      (dolist (s sentences)
        (-should-not-insert-newline-nor-indent s)))))
 
+(ert-deftest pyx/test-colon-indents-current-line ()
+  ""
+  (with-electric-colon-enabled
+   (with-temp-buffer
+     (python-mode)
+     (insert "if foo:\n")
+     (insert "  v = 1\n")
+     (insert "  else")
+     (call-interactively 'pyx/electric-colon)
+     (forward-line -1)
+     (should (looking-at "else")))))
 
 
 

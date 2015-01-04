@@ -63,11 +63,8 @@ regarding when to and when not to insert that newline."
   (interactive "*P")
   (if (fboundp 'python-indent-electric-colon)
       (python-indent-electric-colon arg)
-    ;; @FIXME: alex 2014-08-20 12:14:55 : emacs 24.3.93 removed
-    ;; `python-indent-electric-colon' which is subsumed by
-    ;; `python-indent-post-self-insert-function'. Just inserting a
-    ;; colon triggers a call.
-    (insert ":"))
+    (insert ":")
+    (indent-for-tab-command))
   (when pyx/electric-colon-enabled
     (let ((bol (line-beginning-position)))
       (if (and
