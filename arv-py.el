@@ -45,11 +45,17 @@
 
 ;;; Code:
 
+(defgroup pyx nil
+  "Python extensions."
+  :group 'python
+  :version "24.3")
+
+
 (defcustom pyx/electric-colon-enabled t
   "Non-nil enables `pyx/electric-colon' electric behaviour.
 Setting this variable to t is not enough to make : electric, the
 keybinding must be redefined."
-  :group 'arv-py
+  :group 'pyx
   :type  'boolean
   :safe  'booleanp)
 
