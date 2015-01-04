@@ -30,6 +30,11 @@
 
 ;;; Commentary:
 ;;
+;; Extensions for python-mode (the one bundled with emacs).
+;;
+;; Entry points:
+;;
+;; - pyx/electric-colon
 
 ;;; Dependencies:
 ;;
@@ -40,7 +45,42 @@
 
 ;;; Code:
 
+(defcustom pyx/electric-colon-enabled t
+  "Non-nil enables `pyx/electric-colon' electric behaviour.
+Setting this variable to t is not enough to make : electric, the
+keybinding must be redefined."
+  :group 'arv-py
+  :type  'boolean
+  :safe  'booleanp)
 
+
+;;;###autoload
+(defun pyx/electric-colon (arg)
+  "Inserts a newline after :.
+This function extends `python-indent-electric-colon' inserting a
+newline and indenting that new line. It tries to be smart
+regarding when to and when not to insert that newline."
+  (interactive "*P")
+  (if (fboundp 'python-indent-electric-colon)
+      (python-indent-electric-colon arg)
+    ;; @FIXME: alex 2014-08-20 12:14:55 : emacs 24.3.93 removed
+    ;; `python-indent-electric-colon' which is subsumed by
+    ;; `python-indent-post-self-insert-function'. Just inserting a
+    ;; colon triggers a call.
+    (insert ":"))
+  (when pyx/electric-colon-enabled
+    (let ((bol (line-beginning-position)))
+      (if (and
+           (eolp)
+           (not (python-syntax-comment-or-string-p))
+           (save-excursion
+             (beginning-of-line)
+             (save-match-data
+               (looking-at "^\s*\\(class\\|def\\|if\\|elif\\|else\\|for\\|while\\|try\\|except\\|finally\\|with\\)\\b")))
+           (not (looking-back "\\[[^]]*" bol))
+           (not (looking-back "{[^}]*" bol))
+           (not (looking-back "lambda.*" bol)))
+          (newline-and-indent)))))
 
 
 (provide 'arv-py)
