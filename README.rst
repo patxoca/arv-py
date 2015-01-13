@@ -1,6 +1,6 @@
 .. -*- mode: rst -*-
 
-arv-py
-======
+pyx
+===
 
 helpers for working with python source files.
