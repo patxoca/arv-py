@@ -144,25 +144,97 @@ param1)")))
 
 ;; refactoring
 
-(ert-deftest pyx/test-refactory-iffy-ok ()
+(ert-deftest pyx/test-refactory-wrap-region-no-closing ()
   ""
   (with-python-buffer
    (insert "first sentence\n")
    (insert "second sentence\n")
    (insert "third sentence\n")
-   (pyx/refactor-wrap-if-else 1 20)
+   (pyx/-refactor-wrap-region 1 20 "if:")
    (goto-char (point-min))
-   (should (looking-at-p "if :$"))
-   (forward-line)
-   (should (looking-at-p "    first sentence$"))
-   (forward-line)
-   (should (looking-at-p "    second sentence$"))
-   (forward-line)
-   (should (looking-at-p "else:$"))
-   (forward-line)
-   (should (looking-at-p "    pass$"))
-   (forward-line)
-   (should (looking-at-p "third sentence$"))
-   ))
+   (should (looking-at-p "\
+if:
+    first sentence
+    second sentence
+third sentence"))))
 
+(ert-deftest pyx/test-refactory-wrap-region-single-line-closing ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if:
+    first sentence
+    second sentence
+else:
+third sentence"))))
+
+(ert-deftest pyx/test-refactory-wrap-region-multi-line-closing ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\npass")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if:
+    first sentence
+    second sentence
+else:
+    pass
+third sentence"))))
+
+(ert-deftest pyx/test-refactory-wrap-region-check-point-position-when-point-marker-in-opening ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/-refactor-wrap-region 1 20 "if $0:" "else:")
+   (insert "Foo")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if Foo:
+    first sentence
+    second sentence
+else:
+third sentence"))))
+
+(ert-deftest pyx/test-refactory-wrap-region-check-point-position-when-point-marker-in-closing ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n$0")
+   (insert "Foo")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if:
+    first sentence
+    second sentence
+else:
+    Foo
+third sentence"))))
+
+(ert-deftest pyx/test-refactory-wrap-region-check-point-position-when-no-point-marker ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:")
+   (insert "Foo")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if:
+    first sentence
+    second sentence
+else:
+Foothird sentence"))))
 ;;;  tests.el ends here
