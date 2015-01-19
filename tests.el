@@ -49,6 +49,8 @@
 
 ;;; actual tests
 
+;; electric-colon
+
 (ert-deftest pyx/test-colon-is-electric-when-starting-block ()
   ": is electric when we are starting a block of code"
   (let ((sentences '("def some_function()"
@@ -140,5 +142,27 @@ param1)")))
      (should (looking-at "else")))))
 
 
+;; refactoring
+
+(ert-deftest pyx/test-refactory-iffy-ok ()
+  ""
+  (with-python-buffer
+   (insert "first sentence\n")
+   (insert "second sentence\n")
+   (insert "third sentence\n")
+   (pyx/refactor-wrap-if-else 1 20)
+   (goto-char (point-min))
+   (should (looking-at-p "if :$"))
+   (forward-line)
+   (should (looking-at-p "    first sentence$"))
+   (forward-line)
+   (should (looking-at-p "    second sentence$"))
+   (forward-line)
+   (should (looking-at-p "else:$"))
+   (forward-line)
+   (should (looking-at-p "    pass$"))
+   (forward-line)
+   (should (looking-at-p "third sentence$"))
+   ))
 
 ;;;  tests.el ends here

@@ -43,6 +43,8 @@
 ;;
 
 
+(require 'cl-lib)
+
 ;;; Code:
 
 (defgroup pyx nil
@@ -84,6 +86,66 @@ regarding when to and when not to insert that newline."
            (not (looking-back "{[^}]*" bol))
            (not (looking-back "lambda.*" bol)))
           (newline-and-indent)))))
+
+
+;;; simple refactoring
+
+(defun pyx/-get-expanded-region-beginning (start)
+  (save-excursion
+    (goto-char start)
+    (line-beginning-position)))
+
+
+(defun pyx/-get-expanded-region-end (end)
+  (save-excursion
+    (goto-char end)
+    (forward-line)
+    (point)))
+
+(defun pyx/-refactor-wrap-region (begin end opening &optional closing)
+  "Wraps all lines intersecting the region BEGIN END within an
+OPENING and optional CLOSING block."
+  (let ((begin (pyx/-get-expanded-region-beginning begin))
+        (indentation (save-excursion
+                       (goto-char begin)
+                       (back-to-indentation)
+                       (current-column))))
+    (when closing
+        (save-excursion
+          (goto-char end)
+          (forward-line)
+          (if (eobp)
+              (newline))
+          (cl-dotimes (i indentation)
+            (insert " "))
+          (insert closing)
+          (newline)
+          (cl-dotimes (i (+ indentation python-indent-offset))
+            (insert " "))
+          (insert "pass\n")
+          ))
+    (indent-rigidly begin end python-indent-offset)
+    (goto-char begin)
+    (cl-dotimes (i indentation)
+      (insert " "))
+    (insert opening)
+    (newline)
+    (backward-char 2)
+
+    )
+  )
+
+(defun pyx/refactor-wrap-if-else (begin end)
+  "Wrap all lines intersecting the regions within an 'if/else'
+statement."
+  (interactive "r")
+  (pyx/-refactor-wrap-region begin end "if :" "else:"))
+
+(defun pyx/refactor-wrap-try-except (begin end)
+  "Wrap all lines intersecting the regions within an 'try/except'
+statement."
+  (interactive "r")
+  (pyx/-refactor-wrap-region begin end "try:" "except :"))
 
 
 (provide 'pyx)
