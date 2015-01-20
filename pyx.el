@@ -139,17 +139,28 @@ given by POINT-MARK."
         (goto-char (point-max))))))
 
 (defun pyx/refactor-wrap-if-else (begin end)
-  "Wrap all lines intersecting the regions within an 'if/else'
+  "Wrap all lines intersecting the region within an 'if/else'
 statement."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "if $0:" "else:\npass"))
 
 (defun pyx/refactor-wrap-try-except (begin end)
-  "Wrap all lines intersecting the regions within an 'try/except'
+  "Wrap all lines intersecting the region within an 'try/except'
 statement."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\npass"))
 
+(defun pyx/refactor-wrap-while (begin end)
+  "Wrap all lines intersecting the region within an 'while'
+loop."
+  (interactive "r")
+  (pyx/-refactor-wrap-region begin end "while $0:"))
+
+(defun pyx/refactor-wrap-for (begin end)
+  "Wrap all lines intersecting the region within an 'foo'
+loop."
+  (interactive "r")
+  (pyx/-refactor-wrap-region begin end "while $0:"))
 
 (provide 'pyx)
 
