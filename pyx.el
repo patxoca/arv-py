@@ -70,23 +70,28 @@ This function extends `python-indent-electric-colon' inserting a
 newline and indenting that new line. It tries to be smart
 regarding when to and when not to insert that newline."
   (interactive "*P")
-  (if (fboundp 'python-indent-electric-colon)
-      (python-indent-electric-colon arg)
-    (insert ":")
-    (indent-for-tab-command))
-  (when pyx/electric-colon-enabled
-    (let ((bol (line-beginning-position)))
-      (if (and
-           (eolp)
-           (not (python-syntax-comment-or-string-p))
-           (save-excursion
-             (beginning-of-line)
-             (save-match-data
-               (looking-at "^\s*\\(class\\|def\\|if\\|elif\\|else\\|for\\|while\\|try\\|except\\|finally\\|with\\)\\b")))
-           (not (looking-back "\\[[^]]*" bol))
-           (not (looking-back "{[^}]*" bol))
-           (not (looking-back "lambda.*" bol)))
-          (newline-and-indent)))))
+  (let ((bol (line-beginning-position)))
+    (if (and pyx/electric-colon-enabled
+             (eolp)
+             (not (python-syntax-comment-or-string-p))
+             (save-excursion
+               (beginning-of-line)
+               (save-match-data
+                 (looking-at "^\s*\\(class\\|def\\|if\\|elif\\|else\\|for\\|while\\|try\\|except\\|finally\\|with\\)\\b")))
+             (not (looking-back "\\[[^]]*" bol))
+             (not (looking-back "{[^}]*" bol))
+             (not (looking-back "lambda.*" bol)))
+        (progn
+          (if (fboundp 'python-indent-electric-colon)
+              (python-indent-electric-colon arg)
+            (insert ":")
+            (save-excursion
+              ;; HACK: aparently indent-for-tab-command behaves as
+              ;; expected only at BOL
+              (back-to-indentation)
+              (indent-for-tab-command)))
+          (newline-and-indent))
+      (insert ":"))))
 
 
 ;;; simple refactoring
