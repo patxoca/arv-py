@@ -142,6 +142,18 @@ param1)")))
      (should (looking-at "else")))))
 
 
+(ert-deftest pyx/test-indentation-respects-return ()
+  ""
+  (with-electric-colon-enabled
+   (with-python-buffer
+    (insert "def foo():\n")
+    (insert "    return bla\n")
+    (insert "def bar()")
+    (call-interactively 'pyx/electric-colon)
+    (forward-line -1)
+    (should (looking-at "def bar"))
+    )))
+
 ;; refactoring
 
 (ert-deftest pyx/test-refactory-wrap-region-no-closing ()
