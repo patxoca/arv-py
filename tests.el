@@ -154,6 +154,19 @@ param1)")))
     (should (looking-at "def bar"))
     )))
 
+(ert-deftest pyx/test-indentation-bug ()
+  ""
+  (with-electric-colon-enabled
+   (with-python-buffer
+    (insert "try\n")
+    (insert "    a = 1\n")
+    (insert "    except ValueError")
+    (call-interactively 'pyx/electric-colon)
+    (forward-line -1)
+    (should (looking-at "except ValueError"))
+    )))
+
+
 ;; refactoring
 
 (ert-deftest pyx/test-refactory-wrap-region-no-closing ()
