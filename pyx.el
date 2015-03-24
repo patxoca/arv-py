@@ -169,6 +169,33 @@ loop."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "while $0:"))
 
+
+;;; assorted utilities
+
+(defun pyx/get-current-package-name ()
+  "Return the current package name.
+
+The package name is the name of the directory that contains the
+'setup.py'. If no 'setup.py' is found nil is returned."
+  (let ((parent (locate-dominating-file (buffer-file-name) "setup.py")))
+    (if (null parent)
+        nil
+      (file-name-base (directory-file-name parent)))))
+
+(defun pyx/get-current-module-fqdn ()
+  "Return the current modules fully qualified dotted name.
+
+TODO: assumes '/' path separator. Not tested on windows.
+"
+  (let ((package-root (locate-dominating-file (buffer-file-name) "setup.py"))
+        (module-abs-path (if (s-ends-with? "/__init__.py" (buffer-file-name))
+                             (s-chop-suffix "/__init__.py" (buffer-file-name))
+                           (file-name-sans-extension (buffer-file-name)))))
+    (when package-root
+      (replace-regexp-in-string
+       "/" "."
+       (substring module-abs-path (length (expand-file-name package-root)))))))
+
 (provide 'pyx)
 
 ;;; pyx.el ends here
