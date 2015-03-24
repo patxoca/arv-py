@@ -86,10 +86,12 @@ regarding when to and when not to insert that newline."
               (python-indent-electric-colon arg)
             (insert ":")
             (save-excursion
-              ;; HACK: aparently indent-for-tab-command behaves as
-              ;; expected only at BOL
-              (back-to-indentation)
-              (indent-for-tab-command)))
+              (beginning-of-line)
+              (when (looking-at "^\s*\\(elif\\|else\\|except\\|finally\\)\\b")
+                ;; HACK: aparently indent-for-tab-command behaves as
+                ;; expected only at BOL
+                (back-to-indentation)
+                (indent-for-tab-command))))
           (newline-and-indent))
       (insert ":"))))
 

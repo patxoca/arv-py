@@ -166,6 +166,16 @@ param1)")))
     (should (looking-at "except ValueError"))
     )))
 
+(ert-deftest pyx/test-ec-not-reindents-at-block-start ()
+  ""
+  (with-electric-colon-enabled
+   (with-python-buffer
+    (insert "for i in range(3):\n")
+    (insert "    print i\n")
+    (insert "for i in range(4)\n")
+    (call-interactively 'pyx/electric-colon)
+    (forward-line -1)
+    (should (looking-at "for i in range(4)")))))
 
 ;; refactoring
 
