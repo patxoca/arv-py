@@ -196,6 +196,15 @@ TODO: assumes '/' path separator. Not tested on windows.
        "/" "."
        (substring module-abs-path (length (expand-file-name package-root)))))))
 
+(defun pyx/electric-grave ()
+  "Inserts ```` within a string or just ` elsewhere."
+  (interactive)
+  (if (nth 8 (syntax-ppss))
+      (progn
+        (insert "````")
+        (backward-char 2))
+    (insert "`")))
+
 (provide 'pyx)
 
 ;;; pyx.el ends here
