@@ -115,13 +115,20 @@ regarding when to and when not to insert that newline."
     (let ((indentation (make-string indentation-level ?\s)))
       (cl-dolist (line (s-split "\n" text))
         (insert indentation)
-        (insert line)
+        (if (not (s-starts-with-p ">" line))
+            (insert line)
+          (insert (substring line 1))
+          (indent-according-to-mode))
         (newline)))))
 
 (defun pyx/-refactor-wrap-region (begin end opening &optional closing point-mark)
   "Wraps all lines intersecting the region BEGIN END within an
 OPENING and optional CLOSING block. Moves point to the position
-given by POINT-MARK."
+given by the mark POINT-MARK, $0 by default.
+
+Both OPENING and CLOSING may be multiline. Lines starting with
+'>' are indented according to the mode.
+"
   (let ((point-mark (or point-mark "$0"))
         (begin (pyx/-get-expanded-region-beginning begin))
         (end (pyx/-get-expanded-region-end end))
@@ -138,6 +145,7 @@ given by POINT-MARK."
     (indent-rigidly begin end python-indent-offset)
     (goto-char begin)
     (pyx/-insert-and-indent-rigidly opening indentation)
+    ;; leave point at POINT-MARK and delete the mark
     (save-restriction
       (narrow-to-region begin end-marker)
       (goto-char (point-min))

@@ -218,7 +218,7 @@ third sentence"))))
    (insert "first sentence\n")
    (insert "second sentence\n")
    (insert "third sentence\n")
-   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n    pass")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n>pass")
    (goto-char (point-min))
    (should (looking-at-p "\
 if:
@@ -250,7 +250,7 @@ third sentence"))))
    (insert "first sentence\n")
    (insert "second sentence\n")
    (insert "third sentence\n")
-   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n    $0")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n>$0")
    (insert "Foo")
    (goto-char (point-min))
    (should (looking-at-p "\
@@ -282,7 +282,7 @@ Foothird sentence"))))
   (with-python-buffer
    (insert "def run_task():\n")
    (insert "    task = 1234")
-   (pyx/-refactor-wrap-region 20 25 "try:" "except:\n    pass")
+   (pyx/-refactor-wrap-region 20 25 "try:" "except:\n>pass")
    (goto-char (point-min))
    (should (looking-at-p "\
 def run_task():
