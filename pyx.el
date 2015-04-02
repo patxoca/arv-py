@@ -161,13 +161,13 @@ Both OPENING and CLOSING may be multiline. Lines starting with
   "Wrap all lines intersecting the region within an 'if/else'
 statement."
   (interactive "r")
-  (pyx/-refactor-wrap-region begin end "if $0:" "else:\n    pass"))
+  (pyx/-refactor-wrap-region begin end "if $0:" "else:\n>pass"))
 
 (defun pyx/refactor-wrap-try-except (begin end)
   "Wrap all lines intersecting the region within an 'try/except'
 statement."
   (interactive "r")
-  (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\n    pass"))
+  (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\n>pass"))
 
 (defun pyx/refactor-wrap-while (begin end)
   "Wrap all lines intersecting the region within an 'while'
