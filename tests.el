@@ -335,5 +335,15 @@ while :
 for :
     v = 1234"))))
 
+(ert-deftest pyx/test-wrap-with ()
+  ""
+  (with-python-buffer
+   (insert "v = 1234")
+   (pyx/refactor-wrap-with 2 4)
+   (goto-char (point-min))
+   (should (looking-at-p "\
+with :
+    v = 1234"))))
+
 
 ;;;  tests.el ends here

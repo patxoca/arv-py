@@ -181,6 +181,12 @@ loop."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "for $0:"))
 
+(defun pyx/refactor-wrap-with (begin end)
+  "Wrap all lines intersecting the region within an 'with'
+statement."
+  (interactive "r")
+  (pyx/-refactor-wrap-region begin end "with $0:"))
+
 
 ;;; assorted utilities
 
