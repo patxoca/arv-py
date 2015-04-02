@@ -277,7 +277,7 @@ if:
 else:
 Foothird sentence"))))
 
-(ert-deftest test-bug-wraping-indented-region-does-not-indents-continuation-block ()
+(ert-deftest pyx/test-bug-wraping-indented-region-does-not-indents-continuation-block ()
   ""
   (with-python-buffer
    (insert "def run_task():\n")
