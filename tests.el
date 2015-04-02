@@ -291,5 +291,49 @@ def run_task():
     except:
         pass"))))
 
+(ert-deftest pyx/test-wrap-if-else ()
+  ""
+  (with-python-buffer
+   (insert "v = 1234")
+   (pyx/refactor-wrap-if-else 2 4)
+   (goto-char (point-min))
+   (should (looking-at-p "\
+if :
+    v = 1234
+else:
+    pass"))))
+
+(ert-deftest pyx/test-wrap-try-except ()
+  ""
+  (with-python-buffer
+   (insert "v = 1234")
+   (pyx/refactor-wrap-try-except 2 4)
+   (goto-char (point-min))
+   (should (looking-at-p "\
+try:
+    v = 1234
+except  as e:
+    pass"))))
+
+(ert-deftest pyx/test-wrap-while ()
+  ""
+  (with-python-buffer
+   (insert "v = 1234")
+   (pyx/refactor-wrap-while 2 4)
+   (goto-char (point-min))
+   (should (looking-at-p "\
+while :
+    v = 1234"))))
+
+(ert-deftest pyx/test-wrap-for ()
+  ""
+  (with-python-buffer
+   (insert "v = 1234")
+   (pyx/refactor-wrap-for 2 4)
+   (goto-char (point-min))
+   (should (looking-at-p "\
+for :
+    v = 1234"))))
+
 
 ;;;  tests.el ends here
