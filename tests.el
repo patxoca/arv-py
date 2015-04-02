@@ -46,6 +46,10 @@
       (should (= (current-column) (+ (length text) 1)))
       (should (string-equal (-get-line 1) (concat text ":"))))))
 
+(defun -display-buffer ()
+  (message "**********")
+  (message (buffer-substring-no-properties (point-min) (point-max)))
+  (message "**********"))
 
 ;;; actual tests
 
@@ -214,7 +218,7 @@ third sentence"))))
    (insert "first sentence\n")
    (insert "second sentence\n")
    (insert "third sentence\n")
-   (pyx/-refactor-wrap-region 1 20 "if:" "else:\npass")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n    pass")
    (goto-char (point-min))
    (should (looking-at-p "\
 if:
@@ -246,7 +250,7 @@ third sentence"))))
    (insert "first sentence\n")
    (insert "second sentence\n")
    (insert "third sentence\n")
-   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n$0")
+   (pyx/-refactor-wrap-region 1 20 "if:" "else:\n    $0")
    (insert "Foo")
    (goto-char (point-min))
    (should (looking-at-p "\
@@ -272,4 +276,20 @@ if:
     second sentence
 else:
 Foothird sentence"))))
+
+(ert-deftest test-bug-wraping-indented-region-does-not-indents-continuation-block ()
+  ""
+  (with-python-buffer
+   (insert "def run_task():\n")
+   (insert "    task = 1234")
+   (pyx/-refactor-wrap-region 20 25 "try:" "except:\n    pass")
+   (goto-char (point-min))
+   (should (looking-at-p "\
+def run_task():
+    try:
+        task = 1234
+    except:
+        pass"))))
+
+
 ;;;  tests.el ends here

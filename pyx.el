@@ -110,36 +110,36 @@ regarding when to and when not to insert that newline."
     (forward-line)
     (point)))
 
+(defun pyx/-insert-and-indent-rigidly (text indentation-level)
+  (when text
+    (let ((indentation (make-string indentation-level ?\s)))
+      (cl-dolist (line (s-split "\n" text))
+        (insert indentation)
+        (insert line)
+        (newline)))))
+
 (defun pyx/-refactor-wrap-region (begin end opening &optional closing point-mark)
   "Wraps all lines intersecting the region BEGIN END within an
 OPENING and optional CLOSING block. Moves point to the position
 given by POINT-MARK."
   (let ((point-mark (or point-mark "$0"))
         (begin (pyx/-get-expanded-region-beginning begin))
+        (end (pyx/-get-expanded-region-end end))
+        (end-marker (copy-marker (pyx/-get-expanded-region-end end) t))
         (indentation (save-excursion
                        (goto-char begin)
                        (back-to-indentation)
-                       (current-column)))
-        (start-marker (copy-marker (pyx/-get-expanded-region-beginning begin) nil))
-        (stop-marker (copy-marker (pyx/-get-expanded-region-end end) t)))
+                       (current-column))))
     (when closing
-        (goto-char stop-marker)
+        (goto-char end)
         (if (eobp)
             (newline))
-        (cl-dotimes (i indentation)
-          (insert " "))
-        (cl-dolist (line (s-split "\n" closing))
-          (insert line)
-          (indent-according-to-mode)
-          (newline)))
+        (pyx/-insert-and-indent-rigidly closing indentation))
     (indent-rigidly begin end python-indent-offset)
-    (goto-char start-marker)
-    (cl-dotimes (i indentation)
-      (insert " "))
-    (insert opening)
-    (newline)
+    (goto-char begin)
+    (pyx/-insert-and-indent-rigidly opening indentation)
     (save-restriction
-      (narrow-to-region start-marker stop-marker)
+      (narrow-to-region begin end-marker)
       (goto-char (point-min))
       (if (search-forward point-mark nil t)
           (delete-char (- (length point-mark)))
@@ -149,13 +149,13 @@ given by POINT-MARK."
   "Wrap all lines intersecting the region within an 'if/else'
 statement."
   (interactive "r")
-  (pyx/-refactor-wrap-region begin end "if $0:" "else:\npass"))
+  (pyx/-refactor-wrap-region begin end "if $0:" "else:\n    pass"))
 
 (defun pyx/refactor-wrap-try-except (begin end)
   "Wrap all lines intersecting the region within an 'try/except'
 statement."
   (interactive "r")
-  (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\npass"))
+  (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\n    pass"))
 
 (defun pyx/refactor-wrap-while (begin end)
   "Wrap all lines intersecting the region within an 'while'
