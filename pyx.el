@@ -176,10 +176,10 @@ loop."
   (pyx/-refactor-wrap-region begin end "while $0:"))
 
 (defun pyx/refactor-wrap-for (begin end)
-  "Wrap all lines intersecting the region within an 'foo'
+  "Wrap all lines intersecting the region within an 'for'
 loop."
   (interactive "r")
-  (pyx/-refactor-wrap-region begin end "while $0:"))
+  (pyx/-refactor-wrap-region begin end "for $0:"))
 
 
 ;;; assorted utilities
