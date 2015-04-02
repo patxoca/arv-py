@@ -110,7 +110,7 @@ regarding when to and when not to insert that newline."
     (forward-line)
     (point)))
 
-(defun pyx/-insert-and-indent-rigidly (text indentation-level)
+(defun pyx/-insert-and-indent (text indentation-level)
   (when text
     (let ((indentation (make-string indentation-level ?\s)))
       (cl-dolist (line (s-split "\n" text))
@@ -141,10 +141,10 @@ Both OPENING and CLOSING may be multiline. Lines starting with
         (goto-char end)
         (if (eobp)
             (newline))
-        (pyx/-insert-and-indent-rigidly closing indentation))
+        (pyx/-insert-and-indent closing indentation))
     (indent-rigidly begin end python-indent-offset)
     (goto-char begin)
-    (pyx/-insert-and-indent-rigidly opening indentation)
+    (pyx/-insert-and-indent opening indentation)
     ;; leave point at POINT-MARK and delete the mark
     (save-restriction
       (narrow-to-region begin end-marker)
