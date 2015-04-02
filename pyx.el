@@ -99,15 +99,21 @@ regarding when to and when not to insert that newline."
 ;;; simple refactoring
 
 (defun pyx/-get-expanded-region-beginning (start)
+  "Return point at the beginning of the line containg the
+position START (number-or-marker-p)."
   (save-excursion
     (goto-char start)
     (line-beginning-position)))
 
 
 (defun pyx/-get-expanded-region-end (end)
+  "Return point at the beginning of the first line after position
+END. If END is in the last line inserts a new line."
   (save-excursion
     (goto-char end)
     (forward-line)
+    (if (eobp)
+        (newline))
     (point)))
 
 (defun pyx/-insert-and-indent (text indentation-level)
@@ -139,8 +145,6 @@ Both OPENING and CLOSING may be multiline. Lines starting with
                        (current-column))))
     (when closing
         (goto-char end)
-        (if (eobp)
-            (newline))
         (pyx/-insert-and-indent closing indentation))
     (indent-rigidly begin end python-indent-offset)
     (goto-char begin)
