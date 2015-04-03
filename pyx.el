@@ -214,7 +214,7 @@ TODO: assumes '/' path separator. Not tested on windows.
        "/" "."
        (substring module-abs-path (length (expand-file-name package-root)))))))
 
-(defun pyx/electric-grave ()
+(defun pyx/smart-grave ()
   "Tries to be smart about ` usage patterns.
 
 Within a string it assumes that we are writing rst, after :
