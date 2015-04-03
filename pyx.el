@@ -215,10 +215,23 @@ TODO: assumes '/' path separator. Not tested on windows.
        (substring module-abs-path (length (expand-file-name package-root)))))))
 
 (defun pyx/electric-grave ()
-  "Inserts ```` within a string or just ` elsewhere."
+  "Tries to be smart about ` usage patterns.
+
+Within a string it assumes that we are writing rst, after :
+inserts `` (like in :xref:`whatever`) otherwise insert
+```` (inline code literal). In both cases point is left in the
+middle.
+
+Elsewhere inserts a single `."
   (interactive)
   (if (nth 8 (syntax-ppss))
-      (progn
+      (if (save-excursion
+            (unless (bobp)
+             (backward-char)
+             (looking-at ":")))
+          (progn
+            (insert "``")
+            (backward-char 1))
         (insert "````")
         (backward-char 2))
     (insert "`")))
