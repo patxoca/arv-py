@@ -225,15 +225,22 @@ middle.
 Elsewhere inserts a single `."
   (interactive)
   (if (nth 8 (syntax-ppss))
-      (if (save-excursion
-            (unless (bobp)
-             (backward-char)
-             (looking-at ":")))
-          (progn
-            (insert "``")
-            (backward-char 1))
-        (insert "````")
-        (backward-char 2))
+      (let ((begin (point))
+            (end   (point))
+            (active (region-active-p))
+            (delimiter))
+        (when active
+          (setq begin (min (region-beginning) (region-end)))
+          (setq end   (max (region-beginning) (region-end))))
+        (goto-char begin)
+        (setq delimiter (if (looking-back ":\\w+:" (line-beginning-position))
+                            "`"
+                          "``"))
+        (insert delimiter)
+        (goto-char (+ end (length delimiter)))
+        (insert delimiter)
+        (unless active
+          (backward-char (length delimiter))))
     (insert "`")))
 
 (provide 'pyx)

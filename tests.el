@@ -26,6 +26,22 @@
     (goto-line n)
     (buffer-substring-no-properties (line-beginning-position) (line-end-position))))
 
+(defun -insert-and-goto-mark (text point-mark)
+  (save-excursion
+    (insert text))
+  (search-forward point-mark)
+  (delete-char (- (length point-mark))))
+
+(defun -insert-and-select-region (text open-mark close-mark)
+  (save-excursion
+    (insert text))
+  (transient-mark-mode 1)
+  (search-forward open-mark)
+  (delete-char (- (length open-mark)))
+  (set-mark-command nil)
+  (search-forward close-mark)
+  (delete-char (- (length close-mark))))
+
 (defun -should-insert-newline-and-indent (text)
   (with-python-buffer
     (let ((current-line -1))
@@ -345,5 +361,47 @@ for :
 with :
     v = 1234"))))
 
+
+;; smart-grave
+
+(ert-deftest pyx/test-point-not-in-string-inserts-single-grave ()
+  ""
+  (with-python-buffer
+   (-insert-and-goto-mark "foo@ bar" "@")
+   (pyx/smart-grave)
+   (goto-char (point-min))
+   (should (looking-at "foo` bar"))))
+
+(ert-deftest pyx/test-point-after-role-inserts-double-grave ()
+  ""
+  (with-python-buffer
+   (-insert-and-goto-mark "\":xref:@\"" "@")
+   (pyx/smart-grave)
+   (goto-char (point-min))
+   (should (looking-at "\":xref:``\""))))
+
+(ert-deftest pyx/test-point-not-after-role-inserts-quadruple-grave ()
+  ""
+  (with-python-buffer
+   (-insert-and-goto-mark "\"norole:@\"" "@")
+   (pyx/smart-grave)
+   (goto-char (point-min))
+   (should (looking-at "\"norole:````\""))))
+
+(ert-deftest pyx/test-active-region-after-role-is-surrounded-by-single-grave ()
+  ""
+  (with-python-buffer
+   (-insert-and-select-region "\"foo :xref:[bar] baz\"" "[" "]")
+   (pyx/smart-grave)
+   (goto-char (point-min))
+   (should (looking-at "\"foo :xref:`bar` baz\""))))
+
+(ert-deftest pyx/test-active-region-not-after-role-is-surrounded-by-double-grave ()
+  ""
+  (with-python-buffer
+   (-insert-and-select-region "\"foo [bar] baz\"" "[" "]")
+   (pyx/smart-grave)
+   (goto-char (point-min))
+   (should (looking-at "\"foo ``bar`` baz\""))))
 
 ;;;  tests.el ends here
