@@ -257,6 +257,25 @@ user for the target (with completion) and run it."
              (target (completing-read "Target: " target-list nil t)))
         (compile (format "cd %s && make %s" dir target))))))
 
+(defun pyx/add-setup-dependency (module-name)
+  "Adds dependency to 'setup.py'.
+
+Search for setup.py in parent directories. If found prompt the
+user for a module name and insert it after the '# -*- Extra
+requirements: -*-' marker.
+"
+  (interactive "MModul: ")
+  (let ((dir (locate-dominating-file (buffer-file-name) "setup.py")))
+    (when dir
+      (with-current-buffer (find-file (concat (file-name-as-directory dir) "setup.py"))
+        (save-excursion
+          (goto-char (point-min))
+          (when (search-forward "-*- Extra requirements: -*-" nil t)
+            (end-of-line)
+            (newline)
+            (insert "\"" module-name "\",")
+            (indent-according-to-mode)))))))
+
 (provide 'pyx)
 
 ;;; pyx.el ends here
