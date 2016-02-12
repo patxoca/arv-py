@@ -1,0 +1,16 @@
+-*- mode: org -*-
+
+- pyx/extract-expression-to-variable
+- provar que passa si la regió no està activa
+- pyx/django-declare-view (?)
+  - obte el identificador (nom de funcio/variable) sota el cursor
+  - obte el nom complet del mòdul (pujar fins trobar setup.py i
+    concatenar)
+  - visita el __init__.py del paquet views
+  - insereix l'import
+  - visita el urls.py que hi ha un nivell per sobre
+  - pregunta detalls de la URL (nom, patro ...)
+  - insereis la crida ~url(...)~ corresponent
+
+  Possiblement millor dos funcions independents, sempre es pot definir
+  una tercera funció que les ajunta.
