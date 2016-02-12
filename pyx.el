@@ -243,6 +243,20 @@ Elsewhere inserts a single `."
           (backward-char (length delimiter))))
     (insert "`")))
 
+(defun pyx/make ()
+  "Runs make.
+
+Search for a Makefile in parent directories. If found prompt the
+user for the target (with completion) and run it."
+  (interactive)
+  (let ((dir (locate-dominating-file (buffer-file-name) "Makefile")))
+    (when dir
+      (let* ((target-string (shell-command-to-string (format "cd %s && make -prn | sed -rn '/^[^# \\t\\.%%].*:[^=]?/p' | grep -E '^\\w+:' | cut -d: -f1 | sort" dir)))
+             (target-list (cl-remove-if (lambda (x) (string-equal x "Makefile"))
+                                        (s-split "\n" target-string t)))
+             (target (completing-read "Target: " target-list nil t)))
+        (compile (format "cd %s && make %s" dir target))))))
+
 (provide 'pyx)
 
 ;;; pyx.el ends here
