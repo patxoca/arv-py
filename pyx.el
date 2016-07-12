@@ -255,7 +255,7 @@ user for the target (with completion) and run it."
              (target-list (cl-remove-if (lambda (x) (string-equal x "Makefile"))
                                         (s-split "\n" target-string t)))
              (target (completing-read "Target: " target-list nil t)))
-        (compile (format "cd %s && make %s" dir target))))))
+        (compile (format "cd %s && make %s" dir target) t)))))
 
 (defun pyx/add-setup-dependency (module-name)
   "Adds dependency to 'setup.py'.
