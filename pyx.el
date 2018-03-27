@@ -54,6 +54,151 @@
   :version "24.3")
 
 
+;;; Private helpers
+
+(defun pyx/--is-toplevel-object ()
+  "Determina si es tracta d'una definició de nivell superior.
+
+Avalua a t si el punt es troba en una línia que conté una
+element de nivell més alt.  Esta pensada per ser cridada al
+començament de blocs (if, def, class ...).  En altes contexts pot
+compotar-se de manera estranya."
+  (save-excursion
+    (let ((start (progn
+		   (beginning-of-line)
+		   (point)))
+	  (indent (progn
+		    (back-to-indentation)
+		    (point))))
+      (= start indent))))
+
+(defun pyx/--info-looking-at-beginning-of-class ()
+  "Determina si es tracta de la definició d'una classe.
+
+Avalua a t si el punt es troba en una línia que conté la paraula
+reservada `class' en el context de la definició d'una classe."
+  (and
+   (python-info-looking-at-beginning-of-defun)
+   (save-excursion
+     (back-to-indentation)
+     (looking-at "class[[:space:]]+"))))
+
+(defun pyx/--info-looking-at-beginning-of-def ()
+  "Determina si es tracta de la definició d'una funció/mètode.
+
+Avalua a t si el punt es troba en una línia que conté la paraula
+reservada `def' en el context de la definició d'una
+funció/mètode."
+  (and
+   (python-info-looking-at-beginning-of-defun)
+   (save-excursion
+     (back-to-indentation)
+     (looking-at "def[[:space:]]+"))))
+
+
+;;; Navigation
+
+(defun pyx/nav-beginning-of-class ()
+  "Mou el punt al principi de la classe."
+  (while (and (not (pyx/--info-looking-at-beginning-of-class))
+	      (not (pyx/--is-toplevel-object)))
+    (python-nav-beginning-of-defun 1)))
+
+(defun pyx/nav-beginning-of-def ()
+  "Mou el punt al principi de la funció/mètode."
+  (while (and (not (pyx/--info-looking-at-beginning-of-def))
+	      (not (pyx/--is-toplevel-object)))
+    (python-nav-beginning-of-defun 1)))
+
+;;;###autoload
+(defun pyx/nav-goto-first-import ()
+  "Mou el punt al començament del primer 'import' guardant el
+punt anterior en el `mark-ring'. Si no troba cap import deixa el
+punt al mateix lloc.
+
+Retorna la posició del punt si s'ha trobat cap 'import' o `nil'
+en cas contrari."
+  (interactive)
+  (let ((case-fold-search nil)
+        (matched nil))
+    (save-excursion
+      (goto-char (point-min))
+      (while (and
+              (setq matched (search-forward-regexp "\\<import\\>" nil t))
+              (python-syntax-comment-or-string-p))))
+    (when matched
+      (push-mark (point) t nil)
+      (goto-char matched)
+      (beginning-of-line))))
+
+
+;;; Query program structure
+
+(defun pyx/info-enclosing-def-name ()
+  "Determina el nom de la funció dins la que es troba el punt.
+
+Retorna una cadena amb el nom de la funció més interna dins al
+que es troba el punt o nil si el punt no es troba dins de cap
+funció."
+  (let ((result nil))
+    (save-excursion
+      (pyx/nav-beginning-of-def)
+      (back-to-indentation)
+      (if (looking-at "def +\\([_[:alnum:]]+\\)")
+        (setq result (match-string 1))))
+    result))
+
+(defun pyx/info-enclosing-class-name ()
+  "Determina el nom de la classe dins la que es troba el punt.
+
+Retorna una cadena amb el nom de la classe més interna dins la
+que es troba el punt o nil si el punt no es troba dins de cap
+classe."
+  (let ((result nil))
+    (save-excursion
+      (pyx/nav-beginning-of-class)
+      (back-to-indentation)
+      (if (looking-at "class +\\([_[:alnum:]]+\\)" )
+        (setq result (match-string 1))))
+    result))
+
+
+;;; outline-mode
+
+;; (defun arv-py-outline-level ()
+;;   "Retorna el outline-level corresponent a elements d'un programa
+;; python. És una prova de concepte per jugar amb outline (que te
+;; certes limitacions.)"
+;;   (interactive)
+;;   (let ((level (- (match-end 0) (match-beginning 0) (length (match-string 1)))))
+;;     (if (member (match-string 1) python-indent-dedenters)
+;;         (+ level (/ python-indent-offset 2))
+;;       level)))
+
+
+;;;###autoload
+(defun pyx/visit-setup-py ()
+  ""
+  (interactive)
+  (let ((parent (locate-dominating-file (buffer-file-name) "setup.py")))
+    (if (not parent)
+        (message "'setup.py' not found")
+      (find-file (concat (file-name-as-directory parent) "setup.py")))))
+
+
+;;;###autoload
+(defun pyx/insert-current-package-name ()
+  "Insert the current package name.
+
+The package name is the name of the directory that contains the
+'setup.py'."
+  (interactive)
+  (let ((name (pyx/get-current-package-name)))
+    (if (null name)
+        (error "'setup.py' not found")
+      (insert name))))
+
+
 (defcustom pyx/electric-colon-enabled t
   "Non-nil enables `pyx/electric-colon' electric behaviour.
 Setting this variable to t is not enough to make : electric, the
