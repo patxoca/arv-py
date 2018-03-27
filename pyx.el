@@ -302,30 +302,35 @@ Both OPENING and CLOSING may be multiline. Lines starting with
           (delete-char (- (length point-mark)))
         (goto-char (point-max))))))
 
+;;;###autoload
 (defun pyx/refactor-wrap-if-else (begin end)
   "Wrap all lines intersecting the region within an 'if/else'
 statement."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "if $0:" "else:\n>pass"))
 
+;;;###autoload
 (defun pyx/refactor-wrap-try-except (begin end)
   "Wrap all lines intersecting the region within an 'try/except'
 statement."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "try:" "except $0 as e:\n>pass"))
 
+;;;###autoload
 (defun pyx/refactor-wrap-while (begin end)
   "Wrap all lines intersecting the region within an 'while'
 loop."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "while $0:"))
 
+;;;###autoload
 (defun pyx/refactor-wrap-for (begin end)
   "Wrap all lines intersecting the region within an 'for'
 loop."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "for $0:"))
 
+;;;###autoload
 (defun pyx/refactor-wrap-with (begin end)
   "Wrap all lines intersecting the region within an 'with'
 statement."
@@ -359,6 +364,7 @@ TODO: assumes '/' path separator. Not tested on windows.
        "/" "."
        (substring module-abs-path (length (expand-file-name package-root)))))))
 
+;;;###autoload
 (defun pyx/smart-grave ()
   "Tries to be smart about ` usage patterns.
 
@@ -388,6 +394,7 @@ Elsewhere inserts a single `."
           (backward-char (length delimiter))))
     (insert "`")))
 
+;;;###autoload
 (defun pyx/make ()
   "Runs make.
 
@@ -402,6 +409,7 @@ user for the target (with completion) and run it."
              (target (completing-read "Target: " target-list nil t)))
         (compile (format "cd %s && make %s" dir target) t)))))
 
+;;;###autoload
 (defun pyx/add-setup-dependency (module-name)
   "Adds dependency to 'setup.py'.
 
