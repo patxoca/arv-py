@@ -44,6 +44,8 @@
 
 
 (require 'cl-lib)
+(require 'dash)
+(require 'f)
 (require 's)
 
 ;;; Code:
@@ -185,6 +187,31 @@ classe."
         (message "'setup.py' not found")
       (find-file (concat (file-name-as-directory parent) "setup.py")))))
 
+;;;###autoload
+(defun pyx/visit-test-module ()
+  "Visit the test module for the current module.
+
+In order to find the test module it looks for a module called
+'tests.py' both in the distribution and package root directories
+and for a module called 'test_MODULE.py' in the subdirectory
+'tests' of the ditribution and package root directories."
+  (interactive)
+  (when (buffer-file-name)
+    (let* ((module-file-name (file-name-nondirectory (buffer-file-name)))
+           (package-root (pyx/get-distribution-root))
+           (package-src-root (pyx/get-package-root)))
+      (when (and package-root package-src-root)
+        (let ((result (-first #'file-exists-p
+                              (list (f-join package-root "tests.py")
+                                    (f-join package-src-root "tests.py")
+                                    (f-join package-root
+                                            "tests"
+                                            (concat "test_" module-file-name))
+                                    (f-join package-src-root
+                                            "tests"
+                                            (concat "test_" module-file-name))))))
+          (when result
+            (find-file result)))))))
 
 ;;;###autoload
 (defun pyx/insert-current-package-name ()
@@ -349,6 +376,28 @@ The package name is the name of the directory that contains the
     (if (null parent)
         nil
       (file-name-base (directory-file-name parent)))))
+
+(defun pyx/get-distribution-root ()
+  "Return the package's distribution root.
+
+The distribution root is the directory containing the 'setup.py'
+file."
+  (let ((root (locate-dominating-file (buffer-file-name) "setup.py")))
+    (when root
+      (expand-file-name root))))
+
+(defun pyx/get-package-root ()
+  "Return the package root.
+
+The package root is the directory containing the actual source
+code. It's a direct child of the distribution root. It's assumed
+that the function is called from a buffer inside the src tree."
+  (let ((pkg-root (pyx/get-distribution-root))
+        (foo (buffer-file-name)))
+    (when (and pkg-root foo)
+      (let ((bar (f-split foo)))
+        (apply #'f-join (subseq bar 0 (1+ (length (f-split pkg-root)))))))))
+
 
 (defun pyx/get-current-module-fqdn ()
   "Return the current modules fully qualified dotted name.
