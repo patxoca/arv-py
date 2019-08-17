@@ -13,3 +13,7 @@
  (depends-on "ecukes")
  (depends-on "ert-runner")
  (depends-on "el-mock"))
+
+;; Local Variables:
+;; mode: emacs-lisp
+;; End:
