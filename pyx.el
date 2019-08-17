@@ -4,7 +4,7 @@
 
 ;; Emacs List Archive Entry
 ;; Filename: pyx.el
-;; Version: $Revision:$
+;; Version: 0.1
 ;; Keywords:
 ;; Author: Alexis Roda <alexis.roda.villalonga@gmail.com>
 ;; Maintainer: Alexis Roda <alexis.roda.villalonga@gmail.com>
