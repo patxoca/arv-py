@@ -14,3 +14,9 @@
 
   Possiblement millor dos funcions independents, sempre es pot definir
   una tercera funció que les ajunta.
+- pyx/create-package
+  - obté el nom del directori (per defecte l'actual)
+  - obté el nom del paquet
+  - crea un directori amb el nom del paquet
+  - crea un =__init__.py= dins
+  - opcionalment demana el nom d'un mòduls, el crea i el visita
