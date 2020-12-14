@@ -113,6 +113,12 @@ funció/mètode."
     (python-nav-beginning-of-defun 1)))
 
 ;;;###autoload
+(defun pyx/nav-up-list ()
+  "Mou el punt un nivell cap amunt."
+  (interactive)
+  (python-nav-up-list -1))
+
+;;;###autoload
 (defun pyx/nav-goto-first-import ()
   "Mou el punt al començament del primer 'import' guardant el
 punt anterior en el `mark-ring'. Si no troba cap import deixa el
