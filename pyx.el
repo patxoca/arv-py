@@ -133,7 +133,9 @@ poden recuperar amb la comanda `pyx/nav-down-list'."
   (interactive)
   (if (ring-empty-p pyx/--nav-ring)
       (user-error "Empty ring.")
-    (goto-char (ring-remove pyx/--nav-ring))))
+    (let ((marker (ring-remove pyx/--nav-ring)))
+      (switch-to-buffer (marker-buffer marker))
+      (goto-char (marker-position marker)))))
 
 ;;;###autoload
 (defun pyx/nav-goto-first-import ()
