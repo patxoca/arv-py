@@ -46,6 +46,7 @@
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
+(require 'ring)
 (require 's)
 
 ;;; Code:
@@ -100,6 +101,11 @@ funció/mètode."
 
 ;;; Navigation
 
+(defvar pyx/nav-ring-size 10
+  "Capacitat de l'anell de posicions.")
+(defvar pyx/--nav-ring (make-ring pyx/nav-ring-size)
+  "Anell de posicions.")
+
 (defun pyx/nav-beginning-of-class ()
   "Mou el punt al principi de la classe."
   (while (and (not (pyx/--info-looking-at-beginning-of-class))
@@ -114,9 +120,20 @@ funció/mètode."
 
 ;;;###autoload
 (defun pyx/nav-up-list ()
-  "Mou el punt un nivell cap amunt."
+  "Mou el punt un nivell cap amunt. Abans de moure's guarda la
+posició en un anell de posicions. Les posicions guardades es
+poden recuperar amb la comanda `pyx/nav-down-list'."
   (interactive)
+  (ring-insert-at-beginning pyx/--nav-ring (point-marker))
   (python-nav-up-list -1))
+
+;;;###autoload
+(defun pyx/nav-down-list ()
+  "Recupera l'última posició guardada per `pyx/nav-up-list'."
+  (interactive)
+  (if (ring-empty-p pyx/--nav-ring)
+      (user-error "Empty ring.")
+    (goto-char (ring-remove pyx/--nav-ring))))
 
 ;;;###autoload
 (defun pyx/nav-goto-first-import ()
