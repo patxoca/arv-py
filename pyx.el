@@ -290,7 +290,7 @@ regarding when to and when not to insert that newline."
                 (back-to-indentation)
                 (indent-for-tab-command))))
           (newline-and-indent))
-      (insert ":"))))
+      (self-insert-command (prefix-numeric-value arg)))))
 
 
 ;;; simple refactoring
