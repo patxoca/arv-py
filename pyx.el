@@ -259,38 +259,35 @@ keybinding must be redefined."
   :type  'boolean
   :safe  'booleanp)
 
+(defun pyx/electric-colon--is-electric ()
+  (let ((bol (line-beginning-position)))
+    (and pyx/electric-colon-enabled
+         (eolp)
+         (not (python-syntax-comment-or-string-p))
+         (save-excursion
+           (beginning-of-line)
+           (save-match-data
+             (looking-at "^\s*\\(class\\|def\\|if\\|elif\\|else\\|for\\|while\\|try\\|except\\|finally\\|with\\)\\b")))
+         (not (looking-back "\\[[^]]*" bol))
+         (not (looking-back "{[^}]*" bol))
+         (not (looking-back "lambda.*" bol)))))
 
 ;;;###autoload
 (defun pyx/electric-colon (arg)
   "Inserts a newline after :.
-This function extends `python-indent-electric-colon' inserting a
-newline and indenting that new line. It tries to be smart
-regarding when to and when not to insert that newline."
+This function tries to be smart regarding when to insert that
+newline and when to indent."
   (interactive "*P")
-  (let ((bol (line-beginning-position)))
-    (if (and pyx/electric-colon-enabled
-             (eolp)
-             (not (python-syntax-comment-or-string-p))
-             (save-excursion
-               (beginning-of-line)
-               (save-match-data
-                 (looking-at "^\s*\\(class\\|def\\|if\\|elif\\|else\\|for\\|while\\|try\\|except\\|finally\\|with\\)\\b")))
-             (not (looking-back "\\[[^]]*" bol))
-             (not (looking-back "{[^}]*" bol))
-             (not (looking-back "lambda.*" bol)))
-        (progn
-          (if (fboundp 'python-indent-electric-colon)
-              (python-indent-electric-colon arg)
-            (insert ":")
-            (save-excursion
-              (beginning-of-line)
-              (when (looking-at "^\s*\\(elif\\|else\\|except\\|finally\\)\\b")
-                ;; HACK: aparently indent-for-tab-command behaves as
-                ;; expected only at BOL
-                (back-to-indentation)
-                (indent-for-tab-command))))
-          (newline-and-indent))
-      (self-insert-command (prefix-numeric-value arg)))))
+  (self-insert-command (prefix-numeric-value arg) ?:)
+  (when (pyx/electric-colon--is-electric)
+    (save-excursion
+      (beginning-of-line)
+      (when (looking-at "^\s*\\(elif\\|else\\|except\\|finally\\)\\b")
+        ;; HACK: aparently indent-for-tab-command behaves as
+        ;; expected only at BOL
+        (back-to-indentation)
+        (indent-for-tab-command)))
+    (newline-and-indent)))
 
 
 ;;; simple refactoring
