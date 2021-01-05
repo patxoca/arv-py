@@ -212,31 +212,30 @@ classe."
         (message "'setup.py' not found")
       (find-file (concat (file-name-as-directory parent) "setup.py")))))
 
+(defun pyx/--locate-tests-directory (from to)
+  (let ((tests-dir (locate-dominating-file from "tests")))
+    (when (and tests-dir
+               (s-starts-with-p (f-expand to) (f-expand tests-dir)))
+      (f-join (f-expand tests-dir) "tests"))))
+
 ;;;###autoload
 (defun pyx/visit-test-module ()
   "Visit the test module for the current module.
 
-In order to find the test module it looks for a module called
-'tests.py' both in the distribution and package root directories
-and for a module called 'test_MODULE.py' in the subdirectory
-'tests' of the ditribution and package root directories."
+If the current module is named 'module.py' this function visits
+the file 'test_module.py' in the tests directory. The tests
+directory is searched in the current module's directory and in
+the parent directories until the root of the package is reached."
   (interactive)
   (when (buffer-file-name)
     (let* ((module-file-name (file-name-nondirectory (buffer-file-name)))
-           (package-root (pyx/get-distribution-root))
-           (package-src-root (pyx/get-package-root)))
-      (when (and package-root package-src-root)
-        (let ((result (-first #'file-exists-p
-                              (list (f-join package-root "tests.py")
-                                    (f-join package-src-root "tests.py")
-                                    (f-join package-root
-                                            "tests"
-                                            (concat "test_" module-file-name))
-                                    (f-join package-src-root
-                                            "tests"
-                                            (concat "test_" module-file-name))))))
-          (when result
-            (find-file result)))))))
+           (tests-directory (pyx/--locate-tests-directory (buffer-file-name)
+                                                          (pyx/get-distribution-root)))
+           (test-module (and tests-directory
+                             (f-join tests-directory
+                                     (concat "test_" module-file-name)))))
+      (when (and test-module (file-exists-p test-module))
+        (find-file test-module)))))
 
 ;;;###autoload
 (defun pyx/insert-current-package-name ()
