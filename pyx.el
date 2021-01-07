@@ -219,14 +219,14 @@ classe."
       (f-join (f-expand tests-dir) "tests"))))
 
 ;;;###autoload
-(defun pyx/visit-test-module ()
+(defun pyx/visit-test-module (arg)
   "Visit the test module for the current module.
 
 If the current module is named 'module.py' this function visits
 the file 'test_module.py' in the tests directory. The tests
 directory is searched in the current module's directory and in
 the parent directories until the root of the package is reached."
-  (interactive)
+  (interactive "P")
   (when (buffer-file-name)
     (let* ((module-file-name (file-name-nondirectory (buffer-file-name)))
            (tests-directory (pyx/--locate-tests-directory (buffer-file-name)
@@ -234,7 +234,7 @@ the parent directories until the root of the package is reached."
            (test-module (and tests-directory
                              (f-join tests-directory
                                      (concat "test_" module-file-name)))))
-      (when (and test-module (file-exists-p test-module))
+      (when (and test-module (or arg (file-exists-p test-module)))
         (find-file test-module)))))
 
 ;;;###autoload
