@@ -225,7 +225,10 @@ classe."
 If the current module is named 'module.py' this function visits
 the file 'test_module.py' in the tests directory. The tests
 directory is searched in the current module's directory and in
-the parent directories until the root of the package is reached."
+the parent directories until the root of the package is reached.
+
+If called with the prefix argument the test module is created if
+it does not exist."
   (interactive "P")
   (when (buffer-file-name)
     (let* ((module-file-name (file-name-nondirectory (buffer-file-name)))
