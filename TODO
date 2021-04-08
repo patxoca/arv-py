@@ -20,3 +20,20 @@
   - crea un directori amb el nom del paquet
   - crea un =__init__.py= dins
   - opcionalment demana el nom d'un mòduls, el crea i el visita
+
+- Ampliar el nombre de mòduls de test provats/buscats en
+  pyx/visit-test-module. Normalment treballo amb paquets menuts i no
+  hi ha conflicte amb el noms dels mòduls de test però en paquets
+  grans podria ocorrer que dos subpaquets tinguessin mòduls amb el
+  mateix nom i açò generaria un conflicte en el nom dels mòduls de
+  test tal com es generen actualment (si el mòduls es diu foo.py el
+  mòdul de test es diu test_foo.py).
+
+  Estrategies alternatives:
+
+  - recrear l'estructura de subpaquets en els tests: src/foo/bar.py
+    genera src/tests/foo/test_bar.py
+
+  - incloure l'estructura de subpaquets en el nom dels mòduls de test:
+    src/foo/bar.py genera src/tests/test_foo_bar.py. Açò pot seguir
+    generant conflictes encara que és més improbable.
