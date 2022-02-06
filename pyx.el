@@ -56,6 +56,17 @@
   :group 'python
   :version "24.3")
 
+(defvar pyx/api-skeleton "\
+# -*- coding: utf-8 -*-
+
+## MARKER:IMPORT_BEGIN
+## MARKER:IMPORT_END
+
+__all__ = [
+    ## MARKER:ALL_BEGIN
+    ## MARKER:ALL_END
+])
+")
 
 ;;; Private helpers
 
@@ -97,6 +108,60 @@ funció/mètode."
    (save-excursion
      (back-to-indentation)
      (looking-at "def[[:space:]]+"))))
+
+(defun pyx/--api-visit-or-create-api-module ()
+  "Visit the API module for the current project.
+
+If the API module (api.py) does not exists create a new module
+and fills it with boilerplate."
+  (let* ((api-module-path (f-join (pyx/get-package-root) "api.py"))
+         (buffer (find-file-noselect api-module-path)))
+    (unless (file-exists-p api-module-path)
+      (with-current-buffer buffer
+        (insert pyx/api-skeleton)))
+    buffer))
+
+(defun pyx/--marker-find (name)
+  "Search a marker and returns the positions at the end of line. If
+the marker can't be found return nil."
+  (save-excursion
+    (goto-char (point-min))
+    (save-match-data
+      (search-forward-regexp (format "^\s*## MARKER:%s$" name) nil t))))
+
+(defun pyx/--marker-insert-before (name text)
+  "Insert some text before a marker.
+
+A marker named NAME is a line of the form '## MARKER:NAME' with
+optional leading whitespace. This function inserts and indents
+TEXT in the line before the marker named NAME."
+  (let ((pos (pyx/--marker-find name)))
+    (if (null pos)
+        (user-error "Can't find marker %s" name)
+      (save-excursion
+        (goto-char pos)
+        (beginning-of-line)
+        (insert text)
+        (indent-for-tab-command)
+        (newline)))))
+
+(defun pyx/--marker-sort-block (name)
+  "Sort lines within a bloc.
+
+A block is delimited by a line '## MARKER:NAME_BEGIN' and a line
+'## MARKEN:NAME_END'."
+  (let ((pos-begin (pyx/--marker-find (format "%s_BEGIN" name)))
+        (pos-end (pyx/--marker-find (format "%s_END" name))))
+    (unless pos-begin
+      (user-error "Can't find marker %s_BEGIN" name))
+    (unless pos-end
+      (user-error "Can't find marker %s_END" name))
+    (sort-lines nil
+                pos-begin
+                (save-excursion
+                  (goto-char pos-end)
+                  (beginning-of-line)
+                  (point)))))
 
 
 ;;; Navigation
@@ -387,6 +452,32 @@ loop."
 statement."
   (interactive "r")
   (pyx/-refactor-wrap-region begin end "with $0:"))
+
+
+;;; API module
+
+;;;###autoload
+(defun pyx/api-export-symbol-at-point ()
+  "Add the symbol at point to the API module.
+
+Adds the symbol at point to the API module for the current
+package. The API module must include a block named IMPORT for the
+imports and a blocK named ALL. See the variable
+`pyx/api-skeleton' for an example."
+  (interactive)
+  (let ((symbol (symbol-at-point))
+        (module (pyx/get-current-module-fqdn)))
+    (unless symbol
+      (user-error "Point must be over a symbol."))
+    (unless module
+      (user-error "Can't get current module dotted name."))
+    (let ((rel-module (concat "." (s-join "." (cdr (s-split "\\." module))))))
+      (with-current-buffer (pyx/--api-visit-or-create-api-module)
+        (pyx/--marker-insert-before "IMPORT_END" (format "from %s import %s" rel-module symbol))
+        (pyx/--marker-sort-block "IMPORT")
+        (pyx/--marker-insert-before "ALL_END" (format "\"%s\"," symbol))
+        (pyx/--marker-sort-block "ALL")
+        (save-buffer)))))
 
 
 ;;; assorted utilities
